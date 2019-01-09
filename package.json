@@ -1,0 +1,20 @@
+{
+  "name": "tacobell-slack",
+  "version": "1.0.0",
+  "description": "Alerts a channel (incoming webhook) about the new items at Taco Bell",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "slack",
+    "tacobell"
+  ],
+  "author": "mike.mattozzi@gmail.com",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.2",
+    "node-persist": "^3.0.2",
+    "request": "^2.88.0"
+  }
+}
