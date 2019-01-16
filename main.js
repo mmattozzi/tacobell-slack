@@ -1,7 +1,21 @@
 const request = require("request");
 const cheerio = require("cheerio");
 const storage = require('node-persist');
+const winston = require('winston');
 const config = require('./config.json');
+
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.combine(
+    winston.format.colorize(),
+    winston.format.timestamp(),
+    winston.format.align(),
+    winston.format.printf(info => `${info.timestamp} ${info.level}: ${info.message}`)
+  ),
+  transports: [
+    new winston.transports.Console()
+  ]
+});
 
 function retrieveNewItems(callback) {
   request("https://www.tacobell.com/food/new", function(err, response,  body) {
@@ -30,7 +44,7 @@ function hasItem(item, set) {
 }
 
 function run() {
-  console.log("Checking for updated Taco Bell items");
+  logger.info("Checking for updated Taco Bell items");
   storage.getItem("items").then(function(savedItems) {
     
     retrieveNewItems(function(items) {
@@ -38,9 +52,9 @@ function run() {
       if (savedItems) {
         var filteredList = items.filter(i => ! hasItem(i, savedItems));
       }
-      console.log(JSON.stringify(filteredList, null, 2));
+      logger.info(JSON.stringify(filteredList, null, 2));
       var promise = storage.setItem("items", items);
-      promise.then(function() { }, function(err) { console.log(err); });
+      promise.then(function() { }, function(err) { logger.error(err); });
       
       if (filteredList.length > 0) {
         var data = {
@@ -69,7 +83,7 @@ function run() {
         }
         
         request(slackPostOptions, function(err, response, body) {
-          console.log("Post to slack got response: " + response.statusCode);
+          logger.info("Post to slack got response: " + response.statusCode);
         });
       }
       
@@ -78,6 +92,6 @@ function run() {
 }
 
 storage.init().then(() => {
-  console.log("Initialized storage, setting interval");
+  logger.info("Initialized storage, setting interval");
   setInterval(run, 86400000);
 });
